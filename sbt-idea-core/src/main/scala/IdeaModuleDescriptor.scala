@@ -31,8 +31,18 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
         <output url={"file://$MODULE_DIR$/" + project.asInstanceOf[ScalaPaths].mainCompilePath.relativePath.toString} />
         <output-test url={"file://$MODULE_DIR$/" + project.asInstanceOf[ScalaPaths].testCompilePath.relativePath.toString} />
         <exclude-output />
-        <content url="file://$MODULE_DIR$">
-          { nodePerExistingSourceFolder("src/main/scala" :: "src/main/resources" :: "src/main/java" :: "src/it/scala" :: Nil) }
+        <content url="file://$MODULE_DIR$"> <!--{
+            val paths = project.asInstanceOf[ScalaPaths]
+            project.
+            def collect(paths: List[PathFinder], isTestFolder: Boolean) = {
+              val nodes = new NodeBuffer()
+              paths.foldRight(Path.emptyPathFinder)(_ +++ _)/*.filter(_.exists)*/.getRelativePaths.map { nodes &+ sourceFolder(_, isTestFolder)}
+              nodes
+            }
+            collect(paths.mainSourceRoots :: Nil, false) //&+
+                    //collect(paths.testSourceRoots :: Nil, true)
+          }-->
+          { nodePerExistingSourceFolder("src_managed/main/scala" :: "src/main/scala" :: "src/main/resources" :: "src/main/java" :: "src/it/scala" :: Nil) }
           { nodePerExistingTestSourceFolder("src/test/scala" :: "src/test/resources" :: "src/test/java" :: Nil) }
           <excludeFolder url="file://$MODULE_DIR$/target" />
         </content>
@@ -126,7 +136,10 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
     nodes
   }
 
-  def sourceFolder(path: String, isTestSourceFolder: Boolean) = <sourceFolder url={"file://$MODULE_DIR$/" + path} isTestSource={isTestSourceFolder.toString} />
+  def sourceFolder(path: String, isTestSourceFolder: Boolean) = {
+      //println("Source: " + path)
+      <sourceFolder url={"file://$MODULE_DIR$/" + path} isTestSource={isTestSourceFolder.toString} />
+  }
 
   def webFacet(webProject: DefaultWebProject): Node = {
     <facet type="web" name="Web">
